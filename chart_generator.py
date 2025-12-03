@@ -1,17 +1,36 @@
 import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.font_manager as fm
 import platform
+import os
 
 # Set font for Chinese support
 system_name = platform.system()
-if system_name == "Windows":
-    plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei']  # Windows - 使用微软雅黑更清晰
-elif system_name == "Darwin":
-    plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']  # MacOS
-else:
-    plt.rcParams['font.sans-serif'] = ['WenQuanYi Micro Hei']  # Linux/Other
 
-plt.rcParams['axes.unicode_minus'] = False
+# 清除字体缓存（解决字体不生效问题）
+try:
+    fm._rebuild()
+except:
+    pass
+
+if system_name == "Windows":
+    plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Arial Unicode MS']
+elif system_name == "Darwin":
+    plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'PingFang SC', 'Heiti SC']
+else:
+    # Linux - 添加多个字体选项作为降级方案
+    plt.rcParams['font.sans-serif'] = [
+        'Noto Sans CJK SC',      # Google Noto 字体
+        'Noto Sans CJK JP',
+        'WenQuanYi Micro Hei',   # 文泉驿微米黑
+        'WenQuanYi Zen Hei',     # 文泉驿正黑
+        'Droid Sans Fallback',   # Android 字体
+        'DejaVu Sans',           # 降级到英文字体
+        'sans-serif'
+    ]
+
+plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
+
 
 # 统一的图表尺寸 - 确保所有图表比例一致
 FIGURE_SIZE = (10, 7)
@@ -218,3 +237,5 @@ def generate_pie_chart(df, title, colors=None):
     plt.subplots_adjust(left=0.15, right=0.85, top=0.92, bottom=0.08)
     
     return fig
+
+
