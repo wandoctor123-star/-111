@@ -1,0 +1,18 @@
+System: Windows
+Checking for Chinese fonts...
+Search for Microsoft YaHei returned: C:\Windows\Fonts\msyh.ttc
+Search for SimHei returned: C:\Windows\Fonts\simhei.ttf
+Search for SimSun returned: C:\Windows\Fonts\simsun.ttc
+Search for NSimSun returned: C:\Users\HUAWEI\AppData\Roaming\Python\Python313\site-packages\matplotlib\mpl-data\fonts\ttf\DejaVuSans.ttf
+  -> Likely not found (defaulted to C:\Users\HUAWEI\AppData\Roaming\Python\Python313\site-packages\matplotlib\mpl-data\fonts\ttf\DejaVuSans.ttf)
+Search for FangSong returned: C:\Windows\Fonts\simfang.ttf
+Search for KaiTi returned: C:\Windows\Fonts\simkai.ttf
+Search for Arial Unicode MS returned: C:\Users\HUAWEI\AppData\Roaming\Python\Python313\site-packages\matplotlib\mpl-data\fonts\ttf\DejaVuSans.ttf
+  -> Likely not found (defaulted to C:\Users\HUAWEI\AppData\Roaming\Python\Python313\site-packages\matplotlib\mpl-data\fonts\ttf\DejaVuSans.ttf)
+
+Found Chinese fonts:
+- Microsoft YaHei: C:\Windows\Fonts\msyh.ttc
+- SimHei: C:\Windows\Fonts\simhei.ttf
+- SimSun: C:\Windows\Fonts\simsun.ttc
+- FangSong: C:\Windows\Fonts\simfang.ttf
+- KaiTi: C:\Windows\Fonts\simkai.ttf

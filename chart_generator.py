@@ -14,7 +14,20 @@ except:
     pass
 
 if system_name == "Windows":
-    plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Arial Unicode MS']
+    # Try to load font files directly for more robustness
+    font_path = None
+    if os.path.exists(r'C:\Windows\Fonts\msyh.ttc'):
+        font_path = r'C:\Windows\Fonts\msyh.ttc'
+    elif os.path.exists(r'C:\Windows\Fonts\simhei.ttf'):
+        font_path = r'C:\Windows\Fonts\simhei.ttf'
+        
+    if font_path:
+        prop = fm.FontProperties(fname=font_path)
+        plt.rcParams['font.family'] = prop.get_name()
+        plt.rcParams['font.sans-serif'] = [prop.get_name(), 'Microsoft YaHei', 'SimHei']
+        print(f"Successfully loaded Windows font from: {font_path}")
+    else:
+        plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Arial Unicode MS']
 elif system_name == "Darwin":
     plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'PingFang SC', 'Heiti SC']
 else:
@@ -30,6 +43,8 @@ else:
         font_path = '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc'
     elif os.path.exists('/usr/share/fonts/truetype/wqy-microhei/wqy-microhei.ttc'):
         font_path = '/usr/share/fonts/truetype/wqy-microhei/wqy-microhei.ttc'
+    elif os.path.exists('/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc'):
+        font_path = '/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc'
     elif os.path.exists('/usr/share/fonts/truetype/google-noto-cjk/NotoSansCJK-Regular.ttc'):
         font_path = '/usr/share/fonts/truetype/google-noto-cjk/NotoSansCJK-Regular.ttc'
         
