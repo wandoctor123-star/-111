@@ -3,69 +3,114 @@ import matplotlib
 import matplotlib.font_manager as fm
 import platform
 import os
+import sys
 
 # Set font for Chinese support
 system_name = platform.system()
 
-# 清除字体缓存（解决字体不生效问题）
+# 强制清除字体缓存（对 Linux/Streamlit Cloud 特别重要）
+try:
+    # 删除字体缓存文件
+    cache_dir = matplotlib.get_cachedir()
+    cache_file = os.path.join(cache_dir, 'fontlist-v330.json')
+    if os.path.exists(cache_file):
+        os.remove(cache_file)
+        print(f"Cleared font cache: {cache_file}")
+except Exception as e:
+    print(f"Could not clear font cache: {e}")
+
+# 重建字体管理器
 try:
     fm._rebuild()
-except:
-    pass
+    print("Font manager rebuilt successfully")
+except Exception as e:
+    print(f"Font rebuild warning: {e}")
 
-if system_name == "Windows":
-    # Try to load font files directly for more robustness
-    font_path = None
-    if os.path.exists(r'C:\Windows\Fonts\msyh.ttc'):
-        font_path = r'C:\Windows\Fonts\msyh.ttc'
-    elif os.path.exists(r'C:\Windows\Fonts\simhei.ttf'):
-        font_path = r'C:\Windows\Fonts\simhei.ttf'
-        
-    if font_path:
-        prop = fm.FontProperties(fname=font_path)
-        plt.rcParams['font.family'] = prop.get_name()
-        plt.rcParams['font.sans-serif'] = [prop.get_name(), 'Microsoft YaHei', 'SimHei']
-        print(f"Successfully loaded Windows font from: {font_path}")
-    else:
-        plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Arial Unicode MS']
-elif system_name == "Darwin":
-    plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'PingFang SC', 'Heiti SC']
-else:
-    # Linux - 尝试加载具体的字体文件
-    font_path = None
+def setup_chinese_font():
+    """
+    设置中文字体，确保在所有环境中都能正确显示中文
+    """
+    system_name = platform.system()
+    font_loaded = False
     
-    # 1. 检查当前目录下是否有 SimHei.ttf (用户上传)
-    if os.path.exists('SimHei.ttf'):
-        font_path = 'SimHei.ttf'
-    
-    # 2. 检查系统常见中文字体路径 (packages.txt 安装的字体)
-    elif os.path.exists('/usr/share/fonts/truetype/wqy/wqy-microhei.ttc'):
-        font_path = '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc'
-    elif os.path.exists('/usr/share/fonts/truetype/wqy-microhei/wqy-microhei.ttc'):
-        font_path = '/usr/share/fonts/truetype/wqy-microhei/wqy-microhei.ttc'
-    elif os.path.exists('/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc'):
-        font_path = '/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc'
-    elif os.path.exists('/usr/share/fonts/truetype/google-noto-cjk/NotoSansCJK-Regular.ttc'):
-        font_path = '/usr/share/fonts/truetype/google-noto-cjk/NotoSansCJK-Regular.ttc'
-        
-    if font_path:
-        # 加载字体文件
-        prop = fm.FontProperties(fname=font_path)
-        plt.rcParams['font.family'] = prop.get_name()
-        print(f"Successfully loaded font from: {font_path}")
-    else:
-        # 降级方案
-        plt.rcParams['font.sans-serif'] = [
-            'WenQuanYi Micro Hei',
-            'Noto Sans CJK SC',
-            'Noto Sans CJK JP',
-            'WenQuanYi Zen Hei',
-            'Droid Sans Fallback',
-            'DejaVu Sans',
-            'sans-serif'
+    if system_name == "Windows":
+        # Windows - 直接加载字体文件
+        font_paths = [
+            r'C:\Windows\Fonts\msyh.ttc',  # Microsoft YaHei
+            r'C:\Windows\Fonts\simhei.ttf',  # SimHei
+            r'C:\Windows\Fonts\simsun.ttc',  # SimSun
         ]
+        
+        for font_path in font_paths:
+            if os.path.exists(font_path):
+                try:
+                    prop = fm.FontProperties(fname=font_path)
+                    font_name = prop.get_name()
+                    plt.rcParams['font.family'] = 'sans-serif'
+                    plt.rcParams['font.sans-serif'] = [font_name] + plt.rcParams['font.sans-serif']
+                    print(f"✓ Windows font loaded: {font_name} from {font_path}")
+                    font_loaded = True
+                    break
+                except Exception as e:
+                    print(f"Failed to load {font_path}: {e}")
+        
+        if not font_loaded:
+            plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'SimSun'] + plt.rcParams['font.sans-serif']
+            print("Using Windows font names (fallback)")
+            
+    elif system_name == "Darwin":
+        # macOS
+        plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'PingFang SC', 'Heiti SC'] + plt.rcParams['font.sans-serif']
+        print("Using macOS fonts")
+        
+    else:
+        # Linux (Streamlit Cloud) - 尝试多个路径
+        font_paths = [
+            '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc',
+            '/usr/share/fonts/truetype/wqy-microhei/wqy-microhei.ttc',
+            '/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc',
+            '/usr/share/fonts/truetype/wqy-zenhei/wqy-zenhei.ttc',
+            '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+            '/usr/share/fonts/truetype/google-noto-cjk/NotoSansCJK-Regular.ttc',
+        ]
+        
+        for font_path in font_paths:
+            if os.path.exists(font_path):
+                try:
+                    prop = fm.FontProperties(fname=font_path)
+                    font_name = prop.get_name()
+                    plt.rcParams['font.family'] = 'sans-serif'
+                    plt.rcParams['font.sans-serif'] = [font_name] + plt.rcParams['font.sans-serif']
+                    print(f"✓ Linux font loaded: {font_name} from {font_path}")
+                    font_loaded = True
+                    break
+                except Exception as e:
+                    print(f"Failed to load {font_path}: {e}")
+        
+        if not font_loaded:
+            # 降级方案：使用字体名称
+            plt.rcParams['font.sans-serif'] = [
+                'WenQuanYi Micro Hei',
+                'WenQuanYi Zen Hei',
+                'Noto Sans CJK SC',
+                'Noto Sans CJK JP',
+                'Droid Sans Fallback',
+                'DejaVu Sans'
+            ] + plt.rcParams['font.sans-serif']
+            print("Using Linux font names (fallback)")
+    
+    # 解决负号显示问题
+    plt.rcParams['axes.unicode_minus'] = False
+    
+    # 打印当前字体配置（用于调试）
+    print(f"Current font.sans-serif: {plt.rcParams['font.sans-serif'][:3]}")
+    
+    return font_loaded
 
-plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
+# 初始化字体
+print(f"Initializing fonts for {system_name}...")
+setup_chinese_font()
+print("Font initialization complete")
 
 
 # 统一的图表尺寸 - 确保所有图表比例一致
